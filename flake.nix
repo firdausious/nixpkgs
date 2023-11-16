@@ -2,10 +2,10 @@
   description = "Firdausious computer setup";
 
   inputs = {
-    home-manager.url = "github:nix-community/home-manager/release-23.05";
+    home-manager.url = "github:nix-community/home-manager/release-23.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     utils.url = "github:numtide/flake-utils";
-    nixpkgs.url = "github:NixOS/nixpkgs/release-23.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/release-23.11";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
   };
 
@@ -14,7 +14,10 @@
     utils.lib.eachDefaultSystem (system:
       let
         pkgs-unstable = import nixpkgs-unstable { inherit system; };
-        overlays = [ (final: prev: { go = pkgs-unstable.go; }) ];
+        overlays = [ (final: prev: {
+          go = pkgs-unstable.go;
+          dbmate = pkgs-unstable.dbmate;
+        }) ];
         pkgs = import nixpkgs { inherit overlays system; };
       in {
         homeConfigurations = {
@@ -29,7 +32,7 @@
                       if pkgs.stdenv.isDarwin then "Users" else "home"
                     }/${username}";
                 in {
-                  home.stateVersion = "23.05";
+                  home.stateVersion = "23.11";
                   home.username = username;
                   home.homeDirectory = homeDirectory;
 
@@ -38,15 +41,18 @@
                       bat
                       bottom
                       dasel
+                      jq
                       home-manager
                       gnupg
                       gawk
                       tre-command
                       librsvg
                       imagemagick
+                      watchman
                       ripgrep
                       wget
                       xclip
+                      neofetch
 
                       nixfmt
                       neovim
@@ -64,16 +70,27 @@
                       ruby
 
                       # go
+                      go
+                      air
                       gopls
                       go-task
                       gotools
                       golangci-lint
+                      go-migrate
+                      sqlc
+                      dbmate
+
+                      bun
 
                       # nodejs
-                      nodejs
+                      nodejs_20
+                      # (nodejs_20.withPackages (ps: with ps; [
+                      #   @zendesk/zcli
+                      # ]))
+                      node2nix
+                      nodePackages.pnpm
                       openapi-generator-cli
                       typescript
-                      node2nix
                       yarn
                       # pkgs.nodePackages."envinfo"
                       # pkgs.nodePackages."npm-check-updates"
@@ -109,7 +126,7 @@
                   # tools
                   programs.zsh.enable = true;
                   programs.zsh.enableAutosuggestions = true;
-                  programs.zsh.enableSyntaxHighlighting = true;
+                  programs.zsh.syntaxHighlighting.enable = true;
                   programs.zsh.autocd = true;
                   programs.zsh.oh-my-zsh.enable = true;
                   programs.zsh.oh-my-zsh.plugins = [ "git" ];
