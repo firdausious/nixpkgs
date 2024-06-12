@@ -2,11 +2,11 @@
   description = "Firdausious computer setup";
 
   inputs = {
-    home-manager.url = "github:nix-community/home-manager/release-23.11";
+    home-manager.url = "github:nix-community/home-manager/release-24.05";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     utils.url = "github:numtide/flake-utils";
-    nixpkgs.url = "github:NixOS/nixpkgs/release-23.11";
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
   };
 
   outputs =
@@ -17,6 +17,8 @@
         overlays = [ (final: prev: {
           go = pkgs-unstable.go;
           dbmate = pkgs-unstable.dbmate;
+          neovim = pkgs-unstable.neovim;
+          bun = pkgs-unstable.bun;
         }) ];
         pkgs = import nixpkgs { inherit overlays system; };
       in {
@@ -32,18 +34,21 @@
                       if pkgs.stdenv.isDarwin then "Users" else "home"
                     }/${username}";
                 in {
-                  home.stateVersion = "23.11";
+                  home.stateVersion = "24.05";
                   home.username = username;
                   home.homeDirectory = homeDirectory;
 
                   home.packages = with pkgs;
                     [
+                      cmake
                       bat
+                      bash
                       bottom
                       dasel
                       jq
                       home-manager
                       gnupg
+		                  gdu
                       gawk
                       tre-command
                       librsvg
@@ -53,15 +58,21 @@
                       wget
                       xclip
                       neofetch
+		                  fzf
+		                  luarocks
+		                  lazygit
+		                  tree-sitter
 
-                      nixfmt
+                      nixfmt-classic
                       neovim
                       tmux
                       zsh
 
+                      asdf-vm
+
                       # python
-                      (python311.withPackages (ps: with ps; [
-                        virtualenv pip pylint scapy numpy beautifulsoup4 
+                      (python312.withPackages (ps: with ps; [
+                        virtualenv pip pylint scapy numpy beautifulsoup4
                       ]))
 
                       # ruby
@@ -89,6 +100,7 @@
                       # ]))
                       node2nix
                       nodePackages.pnpm
+                      nodePackages.typescript
                       openapi-generator-cli
                       typescript
                       yarn
@@ -100,7 +112,7 @@
                       dive
                       flyctl
                       awscli2
-                      google-cloud-sdk
+                      (google-cloud-sdk.withExtraComponents [google-cloud-sdk.components.gke-gcloud-auth-plugin])
                     ] ++ lib.optionals pkgs.stdenv.isLinux [
                       # Add packages only for Linux
                     ] ++ lib.optionals pkgs.stdenv.isDarwin [
@@ -125,7 +137,7 @@
 
                   # tools
                   programs.zsh.enable = true;
-                  programs.zsh.enableAutosuggestions = true;
+                  programs.zsh.autosuggestion.enable = true;
                   programs.zsh.syntaxHighlighting.enable = true;
                   programs.zsh.autocd = true;
                   programs.zsh.oh-my-zsh.enable = true;
