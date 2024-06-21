@@ -48,7 +48,7 @@
                       jq
                       home-manager
                       gnupg
-		                  gdu
+                      gdu
                       gawk
                       tre-command
                       librsvg
@@ -58,10 +58,11 @@
                       wget
                       xclip
                       neofetch
-		                  fzf
-		                  luarocks
-		                  lazygit
-		                  tree-sitter
+                      fzf
+                      luarocks
+                      lazygit
+                      tree-sitter
+                      yazi
 
                       nixfmt-classic
                       neovim
@@ -79,6 +80,7 @@
                       bundix
                       (hiPrio bundler)
                       ruby
+                      fastlane
 
                       # go
                       go
