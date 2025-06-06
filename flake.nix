@@ -2,10 +2,10 @@
   description = "Firdausious computer setup";
 
   inputs = {
-    home-manager.url = "github:nix-community/home-manager/release-24.05";
+    home-manager.url = "github:nix-community/home-manager/release-24.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     utils.url = "github:numtide/flake-utils";
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
   };
 
@@ -14,8 +14,10 @@
     utils.lib.eachDefaultSystem (system:
       let
         pkgs-unstable = import nixpkgs-unstable { inherit system; };
+        config.allowUnfree = true;
         overlays = [ (final: prev: {
           go = pkgs-unstable.go;
+          awscli2 = pkgs-unstable.awscli2;
           dbmate = pkgs-unstable.dbmate;
           neovim = pkgs-unstable.neovim;
           bun = pkgs-unstable.bun;
@@ -34,7 +36,7 @@
                       if pkgs.stdenv.isDarwin then "Users" else "home"
                     }/${username}";
                 in {
-                  home.stateVersion = "24.05";
+                  home.stateVersion = "24.11";
                   home.username = username;
                   home.homeDirectory = homeDirectory;
 
@@ -73,7 +75,7 @@
 
                       # python
                       (python312.withPackages (ps: with ps; [
-                        virtualenv pip pylint scapy numpy beautifulsoup4
+                        virtualenv pip pylint scapy numpy psycopg2
                       ]))
 
                       # ruby
@@ -81,6 +83,11 @@
                       (hiPrio bundler)
                       ruby
                       fastlane
+
+                      # java
+                      zulu
+                      # maven
+                      # gradle
 
                       # go
                       go
@@ -96,7 +103,7 @@
                       bun
 
                       # nodejs
-                      nodejs_20
+                      nodejs_22
                       # (nodejs_20.withPackages (ps: with ps; [
                       #   @zendesk/zcli
                       # ]))
@@ -111,6 +118,11 @@
 
                       protobuf
 
+                      # vlc
+
+                      postgresql
+
+
                       dive
                       flyctl
                       awscli2
@@ -119,6 +131,7 @@
                       # Add packages only for Linux
                     ] ++ lib.optionals pkgs.stdenv.isDarwin [
                       # Add packages only for Darwin (MacOS)
+                      cocoapods
                     ];
 
                   home.shellAliases = {
@@ -126,10 +139,23 @@
                       # example flakeup nixpkgs-unstable
                       "nix flake lock ${nixConfigDirectory} --update-input";
                     nxb =
-                      "nix build ${nixConfigDirectory}/#homeConfigurations.${system}.${username}.activationPackage -o ${nixConfigDirectory}/result ";
+                      "nix build ${nixConfigDirectory}/#homeConfigurations.${system}.${username}.activationPackage -o ${nixConfigDirectory}/result --extra-experimental-features nix-command --extra-experimental-features flakes";
                     nxa =
                       "${nixConfigDirectory}/result/activate switch --flake ${nixConfigDirectory}/#homeConfigurations.${system}.${username}";
                   };
+
+                  home.sessionVariables = {
+                    ANDROID_HOME = "$HOME/Library/Android/sdk";
+                    # SONAR_PATH = "$HOME/Works/system/sonar-scanner-4.7.0.2747-macosx";
+                  };
+
+                  home.sessionPath = [
+                    "$ANDROID_HOME/emulator"
+                    "$ANDROID_HOME/cmdline-tools/latest/bin"
+                    "$ANDROID_HOME/platform-tools"
+                    "$ANDROID_HOME/build-tools/30.0.3"
+                    # "$SONAR_PATH/bin"
+                  ];
 
                   # programming language
                   programs.go.enable = true;
@@ -138,24 +164,50 @@
                   programs.go.goBin = "${homeDirectory}/go/bin/";
 
                   # tools
+                  programs.fzf.enable = true;
+                  programs.fzf.defaultCommand = "fd --type f --hidden --follow --exclude node_modules --exclude .git --exclude Pods";
+                  programs.fzf.defaultOptions = [
+                    "--ansi"
+                    "--preview-window 'right:60%' --preview 'bat'"
+                  ];
+
                   programs.zsh.enable = true;
                   programs.zsh.autosuggestion.enable = true;
                   programs.zsh.syntaxHighlighting.enable = true;
                   programs.zsh.autocd = true;
                   programs.zsh.oh-my-zsh.enable = true;
-                  programs.zsh.oh-my-zsh.plugins = [ "git" ];
-                  programs.zsh.oh-my-zsh.theme = "robbyrussell";
-                  programs.zsh.plugins = [{
-                    name = "zsh-nix-shell";
-                    file = "nix-shell.plugin.zsh";
-                    src = pkgs.fetchFromGitHub {
-                      owner = "chisui";
-                      repo = "zsh-nix-shell";
-                      rev = "v0.5.0";
-                      sha256 =
-                        "0za4aiwwrlawnia4f29msk822rj9bgcygw6a8a6iikiwzjjz0g91";
-                    };
-                  }];
+                  programs.zsh.oh-my-zsh.plugins = [
+                    "git"
+                    "dotenv"
+                    "jsontools"
+                    "web-search"
+                    "colored-man-pages"
+                    "common-aliases"
+                    "copypath"
+                    "copyfile"
+                  ];
+                  programs.zsh.plugins = [
+                    {
+                      name = "zsh-nix-shell";
+                      file = "nix-shell.plugin.zsh";
+                      src = pkgs.fetchFromGitHub {
+                        owner = "chisui";
+                        repo = "zsh-nix-shell";
+                       rev = "v0.5.0";
+                        sha256 =
+                          "0za4aiwwrlawnia4f29msk822rj9bgcygw6a8a6iikiwzjjz0g91";
+                      };
+                    }
+                    {
+                      name = "zsh-autosuggestions";
+                      src = pkgs.fetchFromGitHub {
+                        owner = "zsh-users";
+                        repo = "zsh-autosuggestions";
+                        rev = "v0.7.0";
+                        sha256 = "1g3pij5qn2j7v7jjac2a63lxd97mcsgw6xq6k5p7835q9fjiid98";
+                      };
+                    }
+                  ];
 
                   # home manager
                   programs.home-manager.enable = true;
