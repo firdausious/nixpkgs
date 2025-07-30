@@ -15,12 +15,15 @@
       let
         pkgs-unstable = import nixpkgs-unstable { inherit system; };
         config.allowUnfree = true;
+        config.android_sdk.accept_license = true;
         overlays = [ (final: prev: {
           go = pkgs-unstable.go;
           awscli2 = pkgs-unstable.awscli2;
           dbmate = pkgs-unstable.dbmate;
           neovim = pkgs-unstable.neovim;
           bun = pkgs-unstable.bun;
+          nodejs_22 = pkgs-unstable.nodejs_22;
+          typescript = pkgs-unstable.typescript;
         }) ];
         pkgs = import nixpkgs { inherit overlays system; };
       in {
@@ -42,6 +45,7 @@
 
                   home.packages = with pkgs;
                     [
+                      scrcpy
                       cmake
                       bat
                       bash
