@@ -1,0 +1,3 @@
+# User-specific configuration template
+# Copy this file and rename it to your username.nix
+{ pkgs, lib, ... }:\n\n{\n  # User-specific packages (optional)\n  extraPackages = with pkgs; [\n    # Add your personal packages here\n    # Example:\n    # firefox\n    # vscode\n  ];\n  \n  # User-specific aliases (optional)\n  extraAliases = {\n    # Add your personal aliases here\n    # Example:\n    # ll = \"ls -la\";\n    # grep = \"rg\";\n  };\n  \n  # User-specific environment variables (optional)\n  extraSessionVariables = {\n    # Add your personal environment variables here\n    # Example:\n    # EDITOR = \"nvim\";\n    # BROWSER = \"firefox\";\n  };\n}
