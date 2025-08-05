@@ -63,6 +63,17 @@
                   home-manager.enable = true;
                 };
 
+                # Activation scripts
+                home.activation.rustup = home-manager.lib.hm.dag.entryAfter ["writeBoundary"] ''
+                  # Check if rustup is available and set default stable if no default is set
+                  if command -v rustup >/dev/null 2>&1; then
+                    if ! rustup show active-toolchain >/dev/null 2>&1; then
+                      echo "Setting up Rust stable toolchain..."
+                      $DRY_RUN_CMD rustup default stable
+                    fi
+                  fi
+                '';
+
                 nixpkgs.config.allowUnfree = defaults.allowUnfree;
               }
             ];

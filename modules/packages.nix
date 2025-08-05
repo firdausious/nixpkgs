@@ -49,6 +49,8 @@ let
 
     # Java
     zulu
+    gradle
+    maven
 
     # Go
     go
@@ -60,6 +62,9 @@ let
     go-migrate
     sqlc
     dbmate
+
+    # Rust
+    rustup
 
     # Node.js ecosystem
     nodejs_22
