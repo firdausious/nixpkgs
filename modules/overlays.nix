@@ -22,5 +22,7 @@
   typescript = pkgs-unstable.typescript;
   
   # Infrastructure tools  
+  railway = pkgs-unstable.railway;
+  azure-cli = pkgs-unstable.azure-cli;
   awscli2 = pkgs-unstable.awscli2;
 })

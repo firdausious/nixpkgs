@@ -3,9 +3,19 @@
 {
   # Shell aliases
   shellAliases = {
+    # Nix flake management
     flakeup = "nix flake update ${defaults.nixConfigDirectory} --update-input";
     nxb = "nix build ${defaults.nixConfigDirectory}/#homeConfigurations.${system}.${username}.activationPackage -o ${defaults.nixConfigDirectory}/result --extra-experimental-features nix-command --extra-experimental-features flakes";
     nxa = "${defaults.nixConfigDirectory}/result/activate switch --flake ${defaults.nixConfigDirectory}/#homeConfigurations.${system}.${username}";
+    
+    # Home Manager with explicit flake path (unified directory approach)
+    hm-switch = "home-manager switch --flake ${defaults.nixConfigDirectory}#${username}";
+    hm-build = "home-manager build --flake ${defaults.nixConfigDirectory}#${username}";
+    hm-news = "home-manager news --flake ${defaults.nixConfigDirectory}";
+    
+    # Nix flake shortcuts
+    flake-show = "cd ${defaults.nixConfigDirectory} && nix flake show";
+    flake-check = "cd ${defaults.nixConfigDirectory} && nix flake check";
   };
 
   # ZSH configuration

@@ -16,16 +16,19 @@
       # Support multiple systems
       forAllSystems = utils.lib.genAttrs utils.lib.defaultSystems;
       
+      # Import the existing config.nix
+      nixpkgsConfig = import ./config.nix;
+      
       # Get system-specific packages
       pkgsFor = system: import nixpkgs {
         inherit system;
-        config.allowUnfree = true;
+        config = nixpkgsConfig;
         overlays = [ (import ./modules/overlays.nix { pkgs-unstable = unstablePkgsFor system; }) ];
       };
       
       unstablePkgsFor = system: import nixpkgs-unstable {
         inherit system;
-        config.allowUnfree = true;
+        config = nixpkgsConfig;
       };
       
     in {
@@ -41,6 +44,12 @@
           let
             homeDirectory = if pkgs.stdenv.isDarwin then "/Users/${username}" else "/home/${username}";
             userConfig = (import ./modules/users/${username}.nix) { inherit pkgs lib; };
+            packagesConfig = import ./modules/packages.nix { inherit pkgs pkgs-unstable lib system; };
+            aiToolsConfig = import ./modules/ai-tools.nix { 
+              inherit pkgs pkgs-unstable lib homeDirectory; 
+              aiConfig = userConfig.aiConfig;
+              basePythonPackages = packagesConfig.basePythonPackages;
+            };
           in
           home-manager.lib.homeManagerConfiguration {
             inherit pkgs;
@@ -50,10 +59,25 @@
                   inherit username homeDirectory;
                   stateVersion = defaults.stateVersion;
 
-                  packages = (import ./modules/packages.nix { inherit pkgs pkgs-unstable lib system; }).packages ++ userConfig.extraPackages;
-                  shellAliases = (import ./modules/shell.nix { inherit pkgs defaults system username; }).shellAliases // userConfig.extraAliases;
-                  sessionVariables = (import ./modules/languages.nix { inherit pkgs homeDirectory; }).sessionVariables // userConfig.extraSessionVariables;
-                  sessionPath = (import ./modules/languages.nix { inherit pkgs homeDirectory; }).sessionPath;
+                  packages = let
+                    # Get non-Python packages from base config
+                    nonPythonPackages = builtins.filter (pkg: 
+                      let name = pkg.name or pkg.pname or "";
+                      in !(lib.hasInfix "python" (lib.toLower name))
+                    ) packagesConfig.packages;
+                  in
+                    nonPythonPackages ++ 
+                    aiToolsConfig.aiPackages ++ 
+                    [ aiToolsConfig.pythonWithAIExtensions ] ++
+                    userConfig.extraPackages;
+                  shellAliases = (import ./modules/shell.nix { inherit pkgs defaults system username; }).shellAliases // 
+                                aiToolsConfig.aiAliases // 
+                                userConfig.extraAliases;
+                  sessionVariables = (import ./modules/languages.nix { inherit pkgs homeDirectory; }).sessionVariables // 
+                                    aiToolsConfig.aiSessionVariables // 
+                                    userConfig.extraSessionVariables;
+                  sessionPath = (import ./modules/languages.nix { inherit pkgs homeDirectory; }).sessionPath ++ 
+                               aiToolsConfig.aiSessionPath;
                 };
 
                 programs = {
@@ -74,7 +98,7 @@
                   fi
                 '';
 
-                nixpkgs.config.allowUnfree = defaults.allowUnfree;
+                nixpkgs.config = nixpkgsConfig;
               }
             ];
           }

@@ -1,6 +1,56 @@
 { pkgs, pkgs-unstable, lib, system }:
 
 let
+  # Base Python packages for backend development
+  basePythonPackages = ps: with ps; [
+    # Core Python development tools
+    pip
+    virtualenv
+    setuptools
+    wheel
+    
+    # Code quality and formatting
+    black
+    isort
+    flake8
+    pylint
+    mypy
+    autopep8
+    
+    # Testing
+    pytest
+    pytest-cov
+    pytest-asyncio
+    
+    # Common development libraries
+    requests
+    pydantic
+    python-dotenv
+    rich
+    typer
+    click
+    
+    # Data handling
+    numpy
+    pandas
+    
+    # Web development
+    fastapi
+    uvicorn
+    aiohttp
+    
+    # Database
+    psycopg2
+    sqlalchemy
+    
+    # Utilities
+    pyyaml
+    gitpython
+    
+    # Legacy/specific packages
+    scapy
+  ];
+
   # Core system tools
   corePackages = with pkgs; [
     bash
@@ -36,10 +86,8 @@ let
 
   # Language runtimes and tools
   languagePackages = with pkgs; [
-    # Python
-    (python312.withPackages (ps: with ps; [
-      virtualenv pip pylint scapy numpy psycopg2
-    ]))
+    # Python - Common backend development environment
+    (python313.withPackages basePythonPackages)
 
     # Ruby
     bundix
@@ -68,10 +116,8 @@ let
 
     # Node.js ecosystem
     nodejs_22
-    bun
     node2nix
-    nodePackages.pnpm
-    nodePackages.typescript
+    bun
     openapi-generator-cli
     typescript
     yarn
@@ -80,16 +126,20 @@ let
     php
     php.packages.composer
 
-    # Other
+  # Other
     protobuf
   ];
 
+
   # Infrastructure and cloud tools
   infraPackages = with pkgs; [
-    awscli2
+    htop
+    btop
     dive
-    flyctl
-    postgresql
+
+    railway
+    azure-cli
+    awscli2
     (google-cloud-sdk.withExtraComponents [
       google-cloud-sdk.components.gke-gcloud-auth-plugin
     ])
@@ -114,4 +164,7 @@ let
 in {
   packages = corePackages ++ devPackages ++ languagePackages ++ 
              infraPackages ++ mediaPackages ++ darwinPackages ++ linuxPackages;
+  
+  # Export base Python packages for extension by other modules
+  inherit basePythonPackages;
 }
