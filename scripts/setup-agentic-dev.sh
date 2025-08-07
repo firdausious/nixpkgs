@@ -15,7 +15,7 @@ NC='\033[0m' # No Color
 # Configuration - using environment variables from Nix config
 AI_WORKSPACE="${AI_WORKSPACE:-$HOME/dev-ai}"  # Fallback if env var not set
 CONFIG_DIR="${AI_CONFIG_DIR:-$HOME/.config/dev-ai}"  # Fallback if env var not set
-AI_MODEL="${AI_MODEL:-deepseek-coder:6.7b}"  # Default model
+AI_MODEL="${AI_MODEL:-llama3.1:8b}"  # Default model
 AI_PROVIDER="${AI_PROVIDER:-ollama}"  # Default provider
 
 print_step() {
@@ -114,8 +114,8 @@ setup_ollama() {
         print_success "Ollama service is already running"
     fi
     
-    # Download essential model
-    model="deepseek-coder:6.7b"
+    # Download essential model from centralized configuration
+    model="${AI_MODEL:-llama3.1:8b}"
     
     print_step "Downloading model: $model"
     if ollama list | grep -q "${model%:*}"; then
@@ -161,7 +161,7 @@ Edit `~/.config/dev-ai/config.json` to customize:
 
 ```json
 {
-  "model": "deepseek-coder:6.7b",
+  "model": "llama3.1:8b",
   "provider": "ollama",
   "ollama_url": "http://127.0.0.1:11434",
   "temperature": 0.1

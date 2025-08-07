@@ -180,7 +180,7 @@ The AI workspace and configuration can be customized in `modules/users/[username
 aiConfig = {
   workspace = "dev-ai";              # Main AI workspace directory name
   configDir = ".config/dev-ai";      # Configuration directory  
-  model = "deepseek-coder:6.7b";     # Default LLM model
+  model = "llama3.1:8b";     # Default LLM model
   provider = "ollama";               # Default provider (ollama, openai, anthropic)
 };
 ```
@@ -240,7 +240,7 @@ The AI assistant auto-creates a config file at `~/.config/[config-dir]/config.js
 
 ```json
 {
-  "model": "deepseek-coder:6.7b",
+  "model": "llama3.1:8b",
   "provider": "ollama", 
   "ollama_url": "http://127.0.0.1:11434",
   "temperature": 0.1
@@ -278,7 +278,7 @@ llm-start
 llm-models
 
 # Download model if missing
-ollama pull deepseek-coder:6.7b
+ollama pull llama3.1:8b
 
 # Check installation status
 ~/[workspace]/check-install.sh

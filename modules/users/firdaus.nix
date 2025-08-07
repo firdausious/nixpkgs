@@ -6,7 +6,7 @@ let
   aiConfig = {
     workspace = "dev-ai";              # Main AI workspace directory name
     configDir = ".config/dev-ai";      # Configuration directory
-    model = "deepseek-coder:6.7b";     # Default LLM model
+    model = "llama3.1:8b";     # Default LLM model
     provider = "ollama";               # Default provider (ollama, openai, anthropic)
   };
 in

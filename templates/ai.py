@@ -50,7 +50,7 @@ class SimpleAI:
         config_file = self.config_dir / "config.json"
         # Use environment variables from Nix configuration for defaults
         default_config = {
-            "model": os.environ.get("AI_MODEL", "deepseek-coder:6.7b"),
+            "model": os.environ.get("AI_MODEL", "llama3.1:8b"),
             "provider": os.environ.get("AI_PROVIDER", "ollama"),
             "ollama_url": "http://127.0.0.1:11434",
             "temperature": 0.1
@@ -73,7 +73,7 @@ class SimpleAI:
     def _init_llm(self):
         """Initialize LLM based on configuration"""
         provider = self.config.get("provider", "ollama")
-        model = self.config.get("model", "deepseek-coder:6.7b")
+        model = self.config.get("model", "llama3.1:8b")
         
         try:
             if provider == "ollama":
@@ -153,7 +153,7 @@ class SimpleAI:
         
         return ManualOllamaClient(
             self.config.get("ollama_url", "http://127.0.0.1:11434"),
-            self.config.get("model", "deepseek-coder:6.7b"),
+            self.config.get("model", "llama3.1:8b"),
             self.config.get("temperature", 0.1)
         )
     
